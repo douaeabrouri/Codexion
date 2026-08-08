@@ -31,33 +31,30 @@ int check_the_output(char *str, int loop)
 
 }
 
-
-
-int main(int argc, char ** argv){
+char **parsing(char ** lst, int n_arg){
     
     int loop = 1;
     int index = 0;
 
-    if (argc != 9){
+    if (n_arg != 9){
         printf("The number of arguments must be 9 not %d\n", argc);
         return (1);
     }
 
-    while (index < strlen(argv[argc - 1])){
-        if (argv[argc - 1][index] >= 'A' && argv[argc - 1][index] <= 'Z')
-            argv[argc - 1][index] += 32;
-            // printf(argv[argc - 1][index])
+    while (index < strlen(lst[n_arg - 1])){
+        if (lst[n_arg - 1][index] >= 'A' && lst[n_arg - 1][index] <= 'Z')
+            lst[n_arg - 1][index] += 32;
+            // printf(lst[n_arg - 1][index])
         index++;
     }
 
-    if (strcmp(argv[argc - 1], "fifo") != 0 && strcmp(argv[argc - 1], "edf") != 0){
+    if (strcmp(lst[n_arg - 1], "fifo") != 0 && strcmp(lst[n_arg - 1], "edf") != 0){
         printf("The last argument must be 'fifo' or 'edf'\n");
         return (1);
     }
 
-    while (loop <= argc - 2){
-        check_the_output(argv[loop], loop);
+    while (loop <= n_arg - 2){
+        check_the_output(lst[loop], loop);
         loop++;
     }
 }
-
