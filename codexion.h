@@ -13,6 +13,8 @@ typedef struct s_dongle{
 
 } t_dongle;
 
+
+
 typedef struct s_coder{
 
     int id;
@@ -22,7 +24,6 @@ typedef struct s_coder{
     t_dongle *left;
 
 } t_coder;
-
 
 typedef struct s_data{
 
@@ -37,9 +38,18 @@ typedef struct s_data{
     
     t_coder *coders;
     t_dongle *dongle;
-
 } t_data;
 
-char **parsing(char ** lst, int n_arg);
+
+typedef struct s_simulation{
+    
+    t_data data;
+    t_coder *coder;
+    t_dongle *dongle;
+
+} s_simulation;
+
+
+t_data *parsing(char **lst, int n_arg);
 
 #endif
