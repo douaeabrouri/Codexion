@@ -5,11 +5,12 @@
 #include <pthread.h>
 #include <string.h>
 
+typedef struct s_data t_data;
+
 typedef struct s_dongle{
 
     int id;
-    pthread_mutex_t mutex;
-    long  cooldown;
+    t_data *data;
 
 } t_dongle;
 
@@ -18,10 +19,9 @@ typedef struct s_dongle{
 typedef struct s_coder{
 
     int id;
-    pthread_t thread;
-    int compile_time;
     t_dongle *right;
     t_dongle *left;
+    t_data *data;
 
 } t_coder;
 
@@ -37,15 +37,15 @@ typedef struct s_data{
     int dongle_cooldown;
     
     t_coder *coders;
-    t_dongle *dongle;
+    t_dongle *dongles;
 } t_data;
 
 
 typedef struct s_simulation{
     
     t_data data;
-    t_coder *coder;
-    t_dongle *dongle;
+    t_coder *coders;
+    t_dongle *dongles;
 
 } s_simulation;
 
