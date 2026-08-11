@@ -35,10 +35,10 @@ t_data *parsing(char **lst, int n_arg){
     
     int loop = 1;
     int index = 0;
-
-
     t_data *data;
-    data = (t_data *)malloc(sizeof(int) * n_arg);
+
+    data = malloc(sizeof(t_data));
+
     if (data == NULL)
         return (NULL);
     
@@ -66,7 +66,6 @@ t_data *parsing(char **lst, int n_arg){
         {
             data -> number_of_coders = value;
             // printf("value = %d\n", value);
-
         }
         else if (loop == 2)
             data -> time_to_burnout = value;

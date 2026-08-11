@@ -8,10 +8,8 @@
 typedef struct s_data t_data;
 
 typedef struct s_dongle{
-
     int id;
-    t_data *data;
-
+    pthread_mutex_t mutex;
 } t_dongle;
 
 
@@ -35,19 +33,8 @@ typedef struct s_data{
     long number_of_compiles_required;
     int scheduler;
     int dongle_cooldown;
-    
-    t_coder *coders;
     t_dongle *dongles;
 } t_data;
-
-
-typedef struct s_simulation{
-    
-    t_data data;
-    t_coder *coders;
-    t_dongle *dongles;
-
-} s_simulation;
 
 
 t_data *parsing(char **lst, int n_arg);
