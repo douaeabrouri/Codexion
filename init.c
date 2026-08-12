@@ -23,7 +23,9 @@ void init_dongles(t_dongle *dongles, int num_dongles) {
     while (i < num_dongles) {
         dongles[i].id = i + 1;
         i++;
-    }
+    }];
+    init_dongles(data->dongles, data->number_of_coders);
+
 }
 
 pthread_mutex_t mutex;
@@ -38,9 +40,7 @@ int main(int argc, char **argv){
     data->dongles = malloc(sizeof(t_dongle) * data->number_of_coders);
     coders = malloc(sizeof(t_coder) * data->number_of_coders);
 
-    pthread_t thread[data->number_of_coders];
-    init_dongles(data->dongles, data->number_of_coders);
-
+    pthread_t thread[data->number_of_coders
     while (i < data->number_of_coders){
         int id = i + 1;
         coders[i].id = id;
