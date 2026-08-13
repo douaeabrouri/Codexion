@@ -3,6 +3,14 @@
 #include <stdlib.h>
 #include <pthread.h>
 #include <unistd.h>
+#include <sys/time.h>
+
+long get_time_ms()
+{
+    struct timespec tv; // struct that store the time that system give it to us.
+    gettimeofday(&tv, NULL);
+    return (tv.tv_sec * 1000l) + (tv.tv_nsec * 1000l);
+}
 
 void *routine(void *arg)
 {
@@ -12,14 +20,16 @@ void *routine(void *arg)
     coder = (t_coder *)arg;
     // while(...){
     pthread_mutex_lock(&coder->left->mutex);
-    pthread_mutex_lock(&coder->right->mutex);
-    printf("coder id %d, left dongle %d right dongle %d\n", coder->id, coder->left->id, coder->right->id);
-    //     compile();
-    sleep(2);
-    pthread_mutex_unlock(&coder->left->mutex);
+    long start = get_time_ms();
+    printf("The coder %d is compiling\n", coder->id);
+    coder->finish_compile++;
+    long end = get_time_ms();
+    usleep(coder->data->time_to_compile * 1000);
+    long current = end - start;
+    // and here i will need a condition to compere with burnout
+    // if (current - coder->last_compile > coder->data->time_to_burnout)
     pthread_mutex_unlock(&coder->right->mutex);
     //     debug();
-
     //     refactor();
     // }
     return (NULL);
