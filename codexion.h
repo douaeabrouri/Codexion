@@ -4,6 +4,13 @@
 
 #include <pthread.h>
 #include <string.h>
+#include <stdio.h>
+#include <pthread.h>
+#include <unistd.h>
+#include <limits.h>
+#include <stdlib.h>
+#include <sys/time.h>
+
 
 typedef struct s_data t_data;
 
@@ -34,11 +41,15 @@ typedef struct s_data
     long time_to_debug;
     long time_to_refactor;
     long number_of_compiles_required;
+    long start_time;
     int scheduler;
     int dongle_cooldown;
     t_dongle *dongles;
 } t_data;
 
 t_data *parsing(char **lst, int n_arg);
+long get_time_ms(void);
+void ft_usleep(long ms);
+
 
 #endif

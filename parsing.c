@@ -1,8 +1,4 @@
-#include <stdio.h>
-#include <unistd.h>
-#include <limits.h>
-#include <stdlib.h>
-#include <string.h>
+
 #include "codexion.h"
 
 int check_the_input(char *str, int loop){
