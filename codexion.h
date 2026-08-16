@@ -17,12 +17,12 @@ typedef struct s_data t_data;
 typedef struct s_dongle
 {
     int id;
+    long last_relase;
     pthread_mutex_t mutex;
 } t_dongle;
 
 typedef struct s_coder
 {
-
     int id;
     t_dongle *right;
     t_dongle *left;
@@ -34,22 +34,27 @@ typedef struct s_coder
 
 typedef struct s_data
 {
-
     int number_of_coders;
     long time_to_burnout;
     long time_to_compile;
     long time_to_debug;
     long time_to_refactor;
-    long number_of_compiles_required;
+    int number_of_compiles_required;
     long start_time;
     int scheduler;
+
+    int simulation_end;
     int dongle_cooldown;
+
     t_dongle *dongles;
+    t_coder *coders;
+
 } t_data;
 
 t_data *parsing(char **lst, int n_arg);
 long get_time_ms(void);
 void ft_usleep(long ms);
-
+void *monitor(void *arg);
+void *routine(void *arg);
 
 #endif
