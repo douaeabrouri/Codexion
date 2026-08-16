@@ -13,7 +13,6 @@ void init_dongles(t_data *data, t_dongle *dongles, int num_dongles){
 void compile(t_coder *coder){
 
     long start = get_time_ms();
-    ft_usleep(coder->data->time_to_compile);
     coder->finish_compile++;
     printf("%ld Coder %d is compiling\n", get_time_ms() - coder->data->start_time,coder->id);
 }
@@ -43,7 +42,6 @@ void *routine(void *arg)
     pthread_mutex_unlock(&coder->right->mutex);
     debug(coder);
     refactor(coder);
-    // start++;
     // }
     return (NULL);
 }
