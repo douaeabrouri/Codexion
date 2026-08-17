@@ -54,15 +54,16 @@ t_data *parsing(char **lst, int n_arg){
         return NULL;
     }
 
+    if(strcmp(lst[n_arg - 1], "fifo") == 0)
+        data->scheduler = 0;
+    else if(strcmp(lst[n_arg - 1], "edf") == 0)
+        data->scheduler = 1;
     while (loop <= n_arg - 2){
         int value = check_the_input(lst[loop], loop);
         if (value < 0)
            return (NULL);
         if (loop == 1)
-        {
             data -> number_of_coders = value;
-            // printf("value = %d\n", value);
-        }
         else if (loop == 2)
             data -> time_to_burnout = value;
         else if (loop == 3)
@@ -77,10 +78,8 @@ t_data *parsing(char **lst, int n_arg){
             data -> scheduler = value;
         else if (loop == 8)
             data -> dongle_cooldown = value;
-        // else
-        //     return NULL;
         loop++;
     }
     return (data);
-}
 
+}

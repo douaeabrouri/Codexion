@@ -27,6 +27,7 @@ void refactor(t_coder *coder){
     printf("%ld %d is refactoring\n", get_time_ms() - coder->data->start_time,coder->id);
     ft_usleep(coder->data->time_to_refactor);
 }
+
 int counter = 0;
 void *routine(void *arg)
 {
@@ -34,14 +35,20 @@ void *routine(void *arg)
     long now;
     coder = (t_coder *)arg;
     while(!coder->data->simulation_end){
-        pthread_mutex_lock(&coder->left->mutex);
-        pthread_mutex_lock(&coder->right->mutex);
+        if (coder->id % 2 == 0){
+            pthread_mutex_lock(&coder->left->mutex);
+            pthread_mutex_lock(&coder->right->mutex);
+        }
+        else{
+            pthread_mutex_lock(&coder->right->mutex); 
+            pthread_mutex_lock(&coder->left->mutex);
+        }
         now = get_time_ms();
         compile(coder);
-        coder->left->last_release = get_time_ms();
-        coder->right->last_release = get_time_ms();
-        if (now - dongles->last_release < data->dongle_cooldown)
-            ft_usleep(data->dongle_cooldown);
+        coder->left->last_relase = get_time_ms();
+        coder->right->last_relase = get_time_ms();
+        if (now - coder->data->dongles->last_relase < coder->data->dongle_cooldown)
+            ft_usleep(coder->data->dongle_cooldown);
         pthread_mutex_unlock(&coder->left->mutex);
         pthread_mutex_unlock(&coder->right->mutex);
         debug(coder);
@@ -49,7 +56,6 @@ void *routine(void *arg)
     }
     return (NULL);
 }
-
 
 int main(int argc, char **argv){
     t_data *data;
@@ -86,7 +92,6 @@ int main(int argc, char **argv){
         data->coders[i].last_compile = data->start_time;
         i++;
     }
-
 
     int index = 0;
     while (index < data->number_of_coders){
