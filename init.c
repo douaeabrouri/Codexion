@@ -42,15 +42,22 @@ void *routine(void *arg)
             pthread_mutex_lock(&coder->left->mutex);
             pthread_mutex_lock(&coder->right->mutex); 
         }
+        if (is_simulation_over(coder->data))
+        {
+            pthread_mutex_unlock(&coder->left->mutex);
+            pthread_mutex_unlock(&coder->right->mutex);
+            break;
+        }
         now = get_time_ms();
         compile(coder);
         coder->left->last_relase = get_time_ms();
         coder->right->last_relase = get_time_ms();
-        printf("simulation end %d\n", coder->data->simulation_end);
         if (now - coder->data->dongles->last_relase < coder->data->dongle_cooldown)
             ft_usleep(coder->data->dongle_cooldown);
         pthread_mutex_unlock(&coder->left->mutex);
         pthread_mutex_unlock(&coder->right->mutex);
+        if (is_simulation_over(coder->data))
+            break;
         debug(coder);
         refactor(coder);
     }
@@ -109,5 +116,4 @@ int main(int argc, char **argv){
     free(data->coders);
     free(data);
     return (0);
-
 }

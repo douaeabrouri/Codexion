@@ -45,6 +45,7 @@ typedef struct s_data
 
     int simulation_end;
     int dongle_cooldown;
+    pthread_mutex_t end_mutex;
 
     t_dongle *dongles;
     t_coder *coders;
@@ -56,5 +57,7 @@ long get_time_ms(void);
 void ft_usleep(long ms);
 void *monitor(void *arg);
 void *routine(void *arg);
+int is_simulation_over(t_data *data);
+void set_simulation_over(t_data *data);
 
 #endif

@@ -11,6 +11,23 @@ int compiles_finish(t_data *data){
     }
     return (1);
 }
+void set_simulation_over(t_data *data){
+
+    pthread_mutex_lock(&data->end_mutex);
+    data->simulation_end = 1;
+    pthread_mutex_unlock(&data->end_mutex);
+
+}
+
+int is_simulation_over(t_data *data){
+
+    int end;
+    pthread_mutex_lock(&data->end_mutex);
+    end = data->simulation_end;
+    pthread_mutex_unlock(&data->end_mutex);
+    return (end);
+
+}
 
 void *monitor(void *arg){
     t_data *data;
@@ -22,16 +39,19 @@ void *monitor(void *arg){
         while(index < data->number_of_coders){
             if(get_time_ms() - data->coders[index].last_compile > data->time_to_burnout){
                 printf("%ld %d burned out\n", get_time_ms() - data->start_time, data->coders[index].id);
-                data->simulation_end = 1;
+                set_simulation_over(data);
                 return (NULL);
             }
             index++;
         }
         if(compiles_finish(data)){
-           data->simulation_end = 1;
+           set_simulation_over(data);
            return (NULL);
         }
         usleep(1000);
     }
     return (NULL);
 }
+
+// protect ffrom the problem of data race ! 
+
