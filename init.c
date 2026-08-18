@@ -28,7 +28,6 @@ void refactor(t_coder *coder){
     ft_usleep(coder->data->time_to_refactor);
 }
 
-int counter = 0;
 void *routine(void *arg)
 {
     t_coder *coder;
@@ -36,17 +35,18 @@ void *routine(void *arg)
     coder = (t_coder *)arg;
     while(!coder->data->simulation_end){
         if (coder->id % 2 == 0){
-            pthread_mutex_lock(&coder->left->mutex);
             pthread_mutex_lock(&coder->right->mutex);
+            pthread_mutex_lock(&coder->left->mutex);
         }
         else{
-            pthread_mutex_lock(&coder->right->mutex); 
             pthread_mutex_lock(&coder->left->mutex);
+            pthread_mutex_lock(&coder->right->mutex); 
         }
         now = get_time_ms();
         compile(coder);
         coder->left->last_relase = get_time_ms();
         coder->right->last_relase = get_time_ms();
+        printf("simulation end %d\n", coder->data->simulation_end);
         if (now - coder->data->dongles->last_relase < coder->data->dongle_cooldown)
             ft_usleep(coder->data->dongle_cooldown);
         pthread_mutex_unlock(&coder->left->mutex);
@@ -76,9 +76,7 @@ int main(int argc, char **argv){
         return (1);
 
     data->simulation_end = 0;
-
     init_dongles(data->dongles, data->number_of_coders);
-
     data->start_time =  get_time_ms();
     i = 0;
     while (i < data->number_of_coders)

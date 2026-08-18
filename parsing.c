@@ -80,6 +80,6 @@ t_data *parsing(char **lst, int n_arg){
             data -> dongle_cooldown = value;
         loop++;
     }
-    return (data);
 
+    return (data);
 }
