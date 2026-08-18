@@ -33,7 +33,13 @@ void *routine(void *arg)
     t_coder *coder;
     long now;
     coder = (t_coder *)arg;
-    while(!coder->data->simulation_end){
+    while(!is_simulation_over(coder->data)){
+        
+        // ask scheduler for  persmission 
+        // be come waiting
+        // scheduler decide
+        // selected 
+
         if (coder->id % 2 == 0){
             pthread_mutex_lock(&coder->right->mutex);
             pthread_mutex_lock(&coder->left->mutex);

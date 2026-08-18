@@ -29,6 +29,8 @@ typedef struct s_coder
     t_data *data;
     long last_compile;
     int finish_compile;
+    long waiting_since;
+    int waiting;
 
 } t_coder;
 
