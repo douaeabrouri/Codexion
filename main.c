@@ -23,15 +23,6 @@ int main(int argc, char **argv)
     if (argc != 1){
         printf("");
     }
-
-    // pthread_t thread1, thread2; // the type of pthread_t  (unsigned long)
-    // pthread_create(&thread1, NULL, typing1, NULL);
-    // pthread_create(&thread2, NULL, typing1, NULL);
-    // printf("Waiting ...\n");
-    // pthread_join(thread1, NULL);
-    // pthread_join(thread2, NULL);
-    // printf("Main continues");
-    // printf("value = %d", value);
     return 0;
 }
 

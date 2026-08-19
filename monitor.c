@@ -53,5 +53,3 @@ void *monitor(void *arg){
     return (NULL);
 }
 
-// protect ffrom the problem of data race ! 
-

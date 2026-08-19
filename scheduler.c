@@ -49,5 +49,6 @@ t_coder *scheduler(t_data * data){
     if (data->scheduler == 0)
         return (fifo(data));
     if (data->scheduler == 1)
-        return 
+        return (edf(data));
+    return (NULL);
 }

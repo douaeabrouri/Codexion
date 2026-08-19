@@ -31,41 +31,48 @@ void refactor(t_coder *coder){
 void *routine(void *arg)
 {
     t_coder *coder;
+    t_coder *next;
+
     long now;
     coder = (t_coder *)arg;
     while(!is_simulation_over(coder->data)){
-        
-        // ask scheduler for  persmission 
-        // be come waiting
-        // scheduler decide
-        // selected 
 
-        if (coder->id % 2 == 0){
-            pthread_mutex_lock(&coder->right->mutex);
-            pthread_mutex_lock(&coder->left->mutex);
-        }
-        else{
-            pthread_mutex_lock(&coder->left->mutex);
-            pthread_mutex_lock(&coder->right->mutex); 
-        }
-        if (is_simulation_over(coder->data))
-        {
+        coder->waiting = 1;
+        coder->waiting_since = get_time_ms();
+        next = scheduler(coder->data);
+        if (next == coder){
+            if (coder->id % 2 == 0){
+                pthread_mutex_lock(&coder->right->mutex);
+                pthread_mutex_lock(&coder->left->mutex);
+            }
+            else{
+                pthread_mutex_lock(&coder->left->mutex);
+                pthread_mutex_lock(&coder->right->mutex); 
+            }
+            if (is_simulation_over(coder->data))
+            {
+                pthread_mutex_unlock(&coder->left->mutex);
+                pthread_mutex_unlock(&coder->right->mutex);
+                break;
+            }
+            now = get_time_ms();
+            coder->waiting = 0;
+            compile(coder);
+            coder->left->last_relase = get_time_ms();
+            coder->right->last_relase = get_time_ms();
+            if (now - coder->data->dongles->last_relase < coder->data->dongle_cooldown)
+                ft_usleep(coder->data->dongle_cooldown);
             pthread_mutex_unlock(&coder->left->mutex);
             pthread_mutex_unlock(&coder->right->mutex);
-            break;
+            if (is_simulation_over(coder->data))
+                break;
+            debug(coder);
+            refactor(coder);
         }
-        now = get_time_ms();
-        compile(coder);
-        coder->left->last_relase = get_time_ms();
-        coder->right->last_relase = get_time_ms();
-        if (now - coder->data->dongles->last_relase < coder->data->dongle_cooldown)
-            ft_usleep(coder->data->dongle_cooldown);
-        pthread_mutex_unlock(&coder->left->mutex);
-        pthread_mutex_unlock(&coder->right->mutex);
-        if (is_simulation_over(coder->data))
-            break;
-        debug(coder);
-        refactor(coder);
+        else{
+            pthread_cond_wait(&coder->data->scheduler_cond, &coder->data->scheduler_mutex);
+        }
+
     }
     return (NULL);
 }
@@ -105,6 +112,8 @@ int main(int argc, char **argv){
     }
 
     int index = 0;
+    pthread_mutex_init(&data->scheduler_mutex, NULL);
+    pthread_cond_init(&data->scheduler_cond, NULL);
     while (index < data->number_of_coders){
         pthread_create(&threads[index], NULL, routine, &data->coders[index]);
         index++;
@@ -115,8 +124,10 @@ int main(int argc, char **argv){
         pthread_join(threads[index], NULL);
         index++;
     }
+    pthread_join(monitor_thread, NULL); 
 
-    pthread_join(monitor_thread, NULL);
+    pthread_mutex_destroy(&data->scheduler_mutex);
+    pthread_cond_destroy(&data->scheduler_cond);
     free(threads);
     free(data->dongles);
     free(data->coders);
