@@ -32,46 +32,71 @@ void *routine(void *arg)
 {
     t_coder *coder;
     t_coder *next;
+    long left_elapsed;
+    long right_elapsed;
 
     long now;
     coder = (t_coder *)arg;
+
     while(!is_simulation_over(coder->data)){
 
+        pthread_mutex_lock(&coder->data->scheduler_mutex);
         coder->waiting = 1;
         coder->waiting_since = get_time_ms();
-        next = scheduler(coder->data);
-        if (next == coder){
-            if (coder->id % 2 == 0){
-                pthread_mutex_lock(&coder->right->mutex);
-                pthread_mutex_lock(&coder->left->mutex);
-            }
-            else{
-                pthread_mutex_lock(&coder->left->mutex);
-                pthread_mutex_lock(&coder->right->mutex); 
-            }
-            if (is_simulation_over(coder->data))
-            {
-                pthread_mutex_unlock(&coder->left->mutex);
-                pthread_mutex_unlock(&coder->right->mutex);
+        while (!is_simulation_over(coder->data))
+        {
+            next = scheduler(coder->data);
+
+            if (next == coder)
                 break;
-            }
-            now = get_time_ms();
-            coder->waiting = 0;
-            compile(coder);
-            coder->left->last_relase = get_time_ms();
-            coder->right->last_relase = get_time_ms();
-            if (now - coder->data->dongles->last_relase < coder->data->dongle_cooldown)
-                ft_usleep(coder->data->dongle_cooldown);
-            pthread_mutex_unlock(&coder->left->mutex);
-            pthread_mutex_unlock(&coder->right->mutex);
-            if (is_simulation_over(coder->data))
-                break;
-            debug(coder);
-            refactor(coder);
+
+            pthread_cond_wait(&coder->data->scheduler_cond,
+                            &coder->data->scheduler_mutex);
+        }
+        if (is_simulation_over(coder->data))
+        {
+            pthread_mutex_unlock(&coder->data->scheduler_mutex);
+            break;
+        }
+        coder->waiting = 0;
+        pthread_mutex_unlock(&coder->data->scheduler_mutex);
+        // khssni nxouf ida kan kayn rir coder 1 
+        if(coder->data->number_of_coders == 1){
+            set_simulation_over(coder->data);
+            pthread_cond_broadcast(&coder->data->scheduler_cond);
+            break;
+        }
+        if (coder->id % 2 == 0){
+            pthread_mutex_lock(&coder->right->mutex);
+            pthread_mutex_lock(&coder->left->mutex);
         }
         else{
-            pthread_cond_wait(&coder->data->scheduler_cond, &coder->data->scheduler_mutex);
+            pthread_mutex_lock(&coder->left->mutex);
+            pthread_mutex_lock(&coder->right->mutex); 
         }
+        now = get_time_ms();
+        left_elapsed = now - coder->left->last_relase;
+        right_elapsed = now - coder->right->last_relase;
+        if (left_elapsed < coder->data->dongle_cooldown)
+            ft_usleep(coder->data->dongle_cooldown - left_elapsed);
+            
+        if (right_elapsed < coder->data->dongle_cooldown)
+            ft_usleep(coder->data->dongle_cooldown - right_elapsed);
+        if (is_simulation_over(coder->data))
+        {
+            break;
+        }
+        compile(coder);
+        pthread_mutex_unlock(&coder->left->mutex);
+        pthread_mutex_unlock(&coder->right->mutex);
+    
+        pthread_mutex_lock(&coder->data->scheduler_mutex);
+        pthread_cond_broadcast(&coder->data->scheduler_cond);
+        pthread_mutex_unlock(&coder->data->scheduler_mutex);
+        if (is_simulation_over(coder->data))
+            break;
+        debug(coder);
+        refactor(coder);
 
     }
     return (NULL);
@@ -102,6 +127,8 @@ int main(int argc, char **argv){
     while (i < data->number_of_coders)
     {
         id = i + 1;
+        data->coders[i].waiting = 0;
+        data->coders[i].waiting_since = 0;
         data->coders[i].id = id;
         data->coders[i].data = data;
         data->coders[i].left = &data->dongles[i];
