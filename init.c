@@ -13,9 +13,13 @@ void init_dongles(t_dongle *dongles, int num_dongles){
 void compile(t_coder *coder){
 
     log_state(coder->data, coder->id, "is compiling");
+    pthread_mutex_lock(&coder->coder_mutex);
     coder->last_compile = get_time_ms();
+    pthread_mutex_unlock(&coder->coder_mutex);
     ft_usleep(coder->data->time_to_compile);
+    pthread_mutex_lock(&coder->coder_mutex);
     coder->finish_compile++;
+    pthread_mutex_unlock(&coder->coder_mutex);
 }
 
 void debug(t_coder *coder){
@@ -32,13 +36,20 @@ void *routine(void *arg)
 {
     t_coder *coder;
     t_coder *next;
-    long left_elapsed;
-    long right_elapsed;
 
     long now;
     coder = (t_coder *)arg;
 
     while(!is_simulation_over(coder->data)){
+
+        pthread_mutex_lock(&coder->coder_mutex);
+        if (coder->data->number_of_compiles_required > 0 &&
+            coder->finish_compile >= coder->data->number_of_compiles_required)
+        {
+            pthread_mutex_unlock(&coder->coder_mutex);
+            break;
+        }
+        pthread_mutex_unlock(&coder->coder_mutex);
 
         pthread_mutex_lock(&coder->data->scheduler_mutex);
         coder->waiting = 1;
@@ -87,13 +98,13 @@ void *routine(void *arg)
         }
     
         now = get_time_ms();
-        left_elapsed = now - coder->left->last_relase;
-        right_elapsed = now - coder->right->last_relase;
-        if (left_elapsed < coder->data->dongle_cooldown)
-            ft_usleep(coder->data->dongle_cooldown - left_elapsed);
+        if (now - coder->left->last_relase < coder->data->dongle_cooldown)
+            ft_usleep(coder->data->dongle_cooldown - (now - coder->left->last_relase));
             
-        if (right_elapsed < coder->data->dongle_cooldown)
-            ft_usleep(coder->data->dongle_cooldown - right_elapsed);
+        now = get_time_ms();
+        if (now - coder->right->last_relase < coder->data->dongle_cooldown)
+            ft_usleep(coder->data->dongle_cooldown - (now - coder->right->last_relase));
+
         if (is_simulation_over(coder->data))
         {
             pthread_mutex_unlock(&coder->left->mutex);
@@ -134,7 +145,13 @@ int main(int argc, char **argv){
     data->coders = malloc(sizeof(t_coder) * data->number_of_coders);
     
     if (!threads || !data->dongles || !data->coders)
+    {
+        free(threads);
+        free(data->dongles);
+        free(data->coders);
+        free(data);
         return (1);
+    }
 
     data->simulation_end = 0;
     init_dongles(data->dongles, data->number_of_coders);
@@ -154,6 +171,7 @@ int main(int argc, char **argv){
         data->coders[i].finish_compile= 0;
         data->coders[i].last_compile = data->start_time;
         data->dongles[i].last_relase = data->start_time - data->dongle_cooldown;
+        pthread_mutex_init(&data->coders[i].coder_mutex, NULL);
         i++;
     }
 
@@ -176,6 +194,13 @@ int main(int argc, char **argv){
     pthread_mutex_destroy(&data->end_mutex);
     pthread_mutex_destroy(&data->print_mutex);
     pthread_cond_destroy(&data->scheduler_cond);
+    index = 0;
+    while (index < data->number_of_coders)
+    {
+        pthread_mutex_destroy(&data->coders[index].coder_mutex);
+        pthread_mutex_destroy(&data->dongles[index].mutex);
+        index++;
+    }
     free(threads);
     free(data->dongles);
     free(data->coders);

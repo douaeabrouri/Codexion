@@ -31,6 +31,8 @@ static int higher_priority(t_data *data, t_coder *a, t_coder *b)
 {
     long a_deadline;
     long b_deadline;
+    long a_last;
+    long b_last;
 
     if (data->scheduler == 0)
     {
@@ -38,8 +40,15 @@ static int higher_priority(t_data *data, t_coder *a, t_coder *b)
             return (a->waiting_since < b->waiting_since);
         return (a->id < b->id);
     }
-    a_deadline = a->last_compile + a->data->time_to_burnout;
-    b_deadline = b->last_compile + b->data->time_to_burnout;
+    pthread_mutex_lock(&a->coder_mutex);
+    a_last = a->last_compile;
+    pthread_mutex_unlock(&a->coder_mutex);
+    pthread_mutex_lock(&b->coder_mutex);
+    b_last = b->last_compile;
+    pthread_mutex_unlock(&b->coder_mutex);
+    
+    a_deadline = a_last + a->data->time_to_burnout;
+    b_deadline = b_last + b->data->time_to_burnout;
     if (a_deadline != b_deadline)
         return (a_deadline < b_deadline);
     if (a->waiting_since != b->waiting_since)

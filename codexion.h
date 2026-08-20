@@ -31,6 +31,7 @@ typedef struct s_coder
     int finish_compile;
     long waiting_since;
     int waiting;
+    pthread_mutex_t coder_mutex;
 
 } t_coder;
 
