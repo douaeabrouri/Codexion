@@ -1,11 +1,14 @@
 #include "codexion.h"
 
-int compiles_finish(t_data *data){
+int compiles_finish(t_data *data)
+{
     int index;
 
     index = 0;
-    while(index < data->number_of_coders){
-        if(data->coders[index].finish_compile < data->number_of_compiles_required)
+    while (index < data->number_of_coders)
+    {
+        if (data->coders[index].finish_compile
+                < data->number_of_compiles_required)
             return (0);
         index++;
     }
@@ -16,6 +19,10 @@ void set_simulation_over(t_data *data){
     pthread_mutex_lock(&data->end_mutex);
     data->simulation_end = 1;
     pthread_mutex_unlock(&data->end_mutex);
+
+    pthread_mutex_lock(&data->scheduler_mutex);
+    pthread_cond_broadcast(&data->scheduler_cond);
+    pthread_mutex_unlock(&data->scheduler_mutex);
 
 }
 
@@ -53,7 +60,7 @@ void *monitor(void *arg){
             index++;
         }
         if(compiles_finish(data)){
-           set_simulation_over(data);
+            set_simulation_over(data);
            return (NULL);
         }
         usleep(1000);
