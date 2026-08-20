@@ -19,6 +19,14 @@ void set_simulation_over(t_data *data){
 
 }
 
+void log_state(t_data *data, int id, char *state){
+
+    pthread_mutex_lock(&data->print_mutex);
+    if (!is_simulation_over(data) || strcmp(state, "burned out") == 0)
+        printf("%ld %d %s\n", get_time_ms() - data->start_time, id, state);
+    pthread_mutex_unlock(&data->print_mutex);
+}
+
 int is_simulation_over(t_data *data){
 
     int end;
@@ -34,11 +42,11 @@ void *monitor(void *arg){
     int index;
 
     data = (t_data *)arg;
-    while(!data->simulation_end){
+    while(!is_simulation_over(data)){
         index = 0;
         while(index < data->number_of_coders){
             if(get_time_ms() - data->coders[index].last_compile > data->time_to_burnout){
-                printf("%ld %d burned out\n", get_time_ms() - data->start_time, data->coders[index].id);
+                log_state(data, data->coders[index].id, "burned out");
                 set_simulation_over(data);
                 return (NULL);
             }
@@ -52,4 +60,3 @@ void *monitor(void *arg){
     }
     return (NULL);
 }
-

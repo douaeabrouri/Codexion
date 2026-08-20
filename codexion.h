@@ -48,6 +48,7 @@ typedef struct s_data
     int simulation_end;
     int dongle_cooldown;
     pthread_mutex_t end_mutex;
+    pthread_mutex_t print_mutex;
  
     pthread_mutex_t scheduler_mutex;
     pthread_cond_t scheduler_cond;
@@ -57,6 +58,13 @@ typedef struct s_data
 
 } t_data;
 
+typedef struct s_heap{
+    t_coder **coders;
+    int size;
+    int capacity;
+    t_data *data;
+} t_heap;
+
 t_data *parsing(char **lst, int n_arg);
 long get_time_ms(void);
 void ft_usleep(long ms);
@@ -64,6 +72,7 @@ void *monitor(void *arg);
 void *routine(void *arg);
 int is_simulation_over(t_data *data);
 void set_simulation_over(t_data *data);
+void log_state(t_data *data, int id, char *state);
 t_coder *scheduler(t_data * data);
 
 #endif

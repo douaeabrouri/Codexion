@@ -2,28 +2,10 @@
 #include <pthread.h>
 #include <unistd.h>
 
-int value = 0;
-
-void *typing1()
-{
-    value++;
-}
-
-void *typing(void *arg)
-{
-    printf("THREAD 2 is working too \n");
-    sleep(3);
-    printf("ending ...\n");
-    return NULL;
-}
 
 int main(int argc, char **argv)
 {
-    int i = 0;
-    if (argc != 1){
-        printf("");
-    }
-    return 0;
+    
 }
 
 // int pthread_create(
