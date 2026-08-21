@@ -33,7 +33,6 @@ static int higher_priority(t_data *data, t_coder *a, t_coder *b)
     long b_deadline;
     long a_last;
     long b_last;
-
     if (data->scheduler == 0)
     {
         if (a->waiting_since != b->waiting_since)
@@ -138,16 +137,8 @@ t_coder *edf(t_data *data)
             i++;
             continue;
         }
-
         current_deadline = data->coders[i].last_compile
             + data->time_to_burnout;
-
-        printf("EDF CHECK: coder %d | waiting_since=%ld | "
-               "last_compile=%ld | deadline=%ld\n",
-               data->coders[i].id,
-               data->coders[i].waiting_since,
-               data->coders[i].last_compile,
-               current_deadline);
 
         if (best == NULL)
         {
@@ -186,6 +177,8 @@ t_coder *scheduler(t_data *data)
     t_coder *best;
     int i;
 
+    if (data->scheduler == 1)
+        return (edf(data));
     heap = heap_create(data);
     if (!heap)
         return (NULL);
