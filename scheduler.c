@@ -123,9 +123,9 @@ static t_coder *heap_pop(t_heap *heap)
 
 t_coder *edf(t_data *data)
 {
+    t_coder *best;
     long best_deadline;
     long current_deadline;
-    t_coder *best;
     int i;
 
     best = NULL;
@@ -140,7 +140,14 @@ t_coder *edf(t_data *data)
         }
 
         current_deadline = data->coders[i].last_compile
-            + data->coders[i].data->time_to_burnout;
+            + data->time_to_burnout;
+
+        printf("EDF CHECK: coder %d | waiting_since=%ld | "
+               "last_compile=%ld | deadline=%ld\n",
+               data->coders[i].id,
+               data->coders[i].waiting_since,
+               data->coders[i].last_compile,
+               current_deadline);
 
         if (best == NULL)
         {
@@ -152,8 +159,24 @@ t_coder *edf(t_data *data)
             best = &data->coders[i];
             best_deadline = current_deadline;
         }
+        else if (current_deadline == best_deadline)
+        {
+            if (data->coders[i].waiting_since < best->waiting_since)
+            {
+                best = &data->coders[i];
+                best_deadline = current_deadline;
+            }
+            else if (data->coders[i].waiting_since == best->waiting_since
+                && data->coders[i].id < best->id)
+            {
+                best = &data->coders[i];
+                best_deadline = current_deadline;
+            }
+        }
+
         i++;
     }
+
     return (best);
 }
 

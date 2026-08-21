@@ -66,6 +66,7 @@ void *routine(void *arg)
         }
         if (is_simulation_over(coder->data))
         {
+            coder->waiting = 0;
             pthread_mutex_unlock(&coder->data->scheduler_mutex);
             break;
         }
