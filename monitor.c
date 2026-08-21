@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   monitor.c                                          :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: doabrour <doabrour@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2026/08/21 17:00:02 by doabrour          #+#    #+#             */
+/*   Updated: 2026/08/21 17:09:55 by doabrour         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "codexion.h"
 
 int compiles_finish(t_data *data)
@@ -21,68 +33,62 @@ int compiles_finish(t_data *data)
     }
     return (1);
 }
-void set_simulation_over(t_data *data){
 
-    pthread_mutex_lock(&data->end_mutex);
-    data->simulation_end = 1;
-    pthread_mutex_unlock(&data->end_mutex);
+int	check_finish(t_data *data, int index)
+{
+	int	finished;
 
-    pthread_mutex_lock(&data->scheduler_mutex);
-    pthread_cond_broadcast(&data->scheduler_cond);
-    pthread_mutex_unlock(&data->scheduler_mutex);
-
+	pthread_mutex_lock(&data->coders[index].coder_mutex);
+	finished = data->number_of_compiles_required > 0
+		&& data->coders[index].finish_compile
+		>= data->number_of_compiles_required;
+	pthread_mutex_unlock(&data->coders[index].coder_mutex);
+	return (finished);
 }
 
-void log_state(t_data *data, int id, char *state){
+long	get_last_compile(t_data *data, int index)
+{
+	long	last_compile;
 
-    pthread_mutex_lock(&data->print_mutex);
-    if (!is_simulation_over(data) || strcmp(state, "burned out") == 0)
-        printf("%ld %d %s\n", get_time_ms() - data->start_time, id, state);
-    pthread_mutex_unlock(&data->print_mutex);
+	pthread_mutex_lock(&data->coders[index].coder_mutex);
+	last_compile = data->coders[index].last_compile;
+	pthread_mutex_unlock(&data->coders[index].coder_mutex);
+	return (last_compile);
 }
 
-int is_simulation_over(t_data *data){
+void check_coders(t_data* data, long current_time, int *all_finished){
+    int index;
+    long last_compile;
 
-    int end;
-    pthread_mutex_lock(&data->end_mutex);
-    end = data->simulation_end;
-    pthread_mutex_unlock(&data->end_mutex);
-    return (end);
-
+    index = 0;
+    while(index < data->number_of_coders){
+        if (!check_finish(data, index))
+            *all_finished = 0;
+        else{
+            index++;
+            continue;
+        }
+        last_compile = data->coders[index].last_compile;
+        if(current_time - last_compile > data->time_to_burnout){
+            log_state(data, data->coders[index].id, "burned out");
+            set_simulation_over(data);
+            return ;
+        }
+        index++;
+    }
 }
 
 void *monitor(void *arg){
     t_data *data;
-    int index;
     int all_finished;
     long current_time;
 
     data = (t_data *)arg;
-    while(!is_simulation_over(data)){
-        index = 0;
+    while(!is_simulation_over(data))
+    {
         all_finished = 1;
         current_time = get_time_ms();
-        while(index < data->number_of_coders){
-            pthread_mutex_lock(&data->coders[index].coder_mutex);
-            if (data->number_of_compiles_required > 0 && 
-                data->coders[index].finish_compile < data->number_of_compiles_required)
-                all_finished = 0;
-            if (data->number_of_compiles_required > 0 && 
-                data->coders[index].finish_compile >= data->number_of_compiles_required)
-            {
-                pthread_mutex_unlock(&data->coders[index].coder_mutex);
-                index++;
-                continue;
-            }
-            long last_compile = data->coders[index].last_compile;
-            pthread_mutex_unlock(&data->coders[index].coder_mutex);
-            if(current_time - last_compile > data->time_to_burnout){
-                log_state(data, data->coders[index].id, "burned out");
-                set_simulation_over(data);
-                return (NULL);
-            }
-            index++;
-        }
+        check_coders(data,current_time, &all_finished);
         if(data->number_of_compiles_required > 0 && all_finished){
             set_simulation_over(data);
            return (NULL);

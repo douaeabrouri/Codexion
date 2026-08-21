@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   init.c                                             :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: doabrour <doabrour@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2026/08/21 17:04:03 by doabrour          #+#    #+#             */
+/*   Updated: 2026/08/21 19:28:03 by doabrour         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "codexion.h"
 
 void init_dongles(t_dongle *dongles, int num_dongles){
@@ -10,102 +22,22 @@ void init_dongles(t_dongle *dongles, int num_dongles){
     }
 }
 
-void compile(t_coder *coder){
-
-    log_state(coder->data, coder->id, "is compiling");
-    pthread_mutex_lock(&coder->coder_mutex);
-    coder->last_compile = get_time_ms();
-    pthread_mutex_unlock(&coder->coder_mutex);
-    ft_usleep(coder->data->time_to_compile);
-    pthread_mutex_lock(&coder->coder_mutex);
-    coder->finish_compile++;
-    pthread_mutex_unlock(&coder->coder_mutex);
-}
-
-void debug(t_coder *coder){
-    log_state(coder->data, coder->id, "is debugging");
-    ft_usleep(coder->data->time_to_debug);
-}
-
-void refactor(t_coder *coder){
-    log_state(coder->data, coder->id, "is refactoring");
-    ft_usleep(coder->data->time_to_refactor);
-}
-
 void *routine(void *arg)
 {
     t_coder *coder;
-    t_coder *next;
-
     long now;
+
     coder = (t_coder *)arg;
-
     while(!is_simulation_over(coder->data)){
-
-        pthread_mutex_lock(&coder->coder_mutex);
-        if (coder->data->number_of_compiles_required > 0 &&
-            coder->finish_compile >= coder->data->number_of_compiles_required)
-        {
-            pthread_mutex_unlock(&coder->coder_mutex);
-            break;
-        }
-        pthread_mutex_unlock(&coder->coder_mutex);
-
-        pthread_mutex_lock(&coder->data->scheduler_mutex);
-        coder->waiting = 1;
-        coder->waiting_since = get_time_ms();
-        while (!is_simulation_over(coder->data))
-        {
-            next = scheduler(coder->data);
-
-            if (next == coder)
-                break;
-
-            pthread_cond_wait(&coder->data->scheduler_cond,
-                            &coder->data->scheduler_mutex);
-        }
-        if (is_simulation_over(coder->data))
-        {
-            coder->waiting = 0;
-            pthread_mutex_unlock(&coder->data->scheduler_mutex);
-            break;
-        }
-        coder->waiting = 0;
-        pthread_mutex_unlock(&coder->data->scheduler_mutex);
-    
-        if(coder->data->number_of_coders == 1){
-            pthread_mutex_lock(&coder->left->mutex);
-            log_state(coder->data, coder->id, "has taken a dongle");
-
-            while (!is_simulation_over(coder->data))
-                usleep(1000);
-
-            pthread_mutex_unlock(&coder->left->mutex);
-            return (NULL);
-        }
-    
-        if (coder->id % 2 == 0){
-            pthread_mutex_lock(&coder->right->mutex);
-            log_state(coder->data, coder->id, "has taken a dongle");
-            pthread_mutex_lock(&coder->left->mutex);
-            log_state(coder->data, coder->id, "has taken a dongle");
-        }
-    
-        else{
-            pthread_mutex_lock(&coder->left->mutex);
-            log_state(coder->data, coder->id, "has taken a dongle");
-            pthread_mutex_lock(&coder->right->mutex); 
-            log_state(coder->data, coder->id, "has taken a dongle");
-        }
-    
-        now = get_time_ms();
-        if (now - coder->left->last_relase < coder->data->dongle_cooldown)
-            ft_usleep(coder->data->dongle_cooldown - (now - coder->left->last_relase));
-            
-        now = get_time_ms();
-        if (now - coder->right->last_relase < coder->data->dongle_cooldown)
-            ft_usleep(coder->data->dongle_cooldown - (now - coder->right->last_relase));
-
+        if(!coders_is_finished(coder))
+            break ;
+        if(!wait_for_scheduler(coder))
+            break ;
+		if (one_coder(coder))
+			return (NULL);
+        //
+        take_two_dongles(coder);
+        handle_cooldown(coder);
         if (is_simulation_over(coder->data))
         {
             pthread_mutex_unlock(&coder->left->mutex);
@@ -114,14 +46,7 @@ void *routine(void *arg)
         }
         compile(coder);
         now = get_time_ms();
-        coder->left->last_relase = now;
-        coder->right->last_relase = now;
-        pthread_mutex_unlock(&coder->left->mutex);
-        pthread_mutex_unlock(&coder->right->mutex);
-    
-        pthread_mutex_lock(&coder->data->scheduler_mutex);
-        pthread_cond_broadcast(&coder->data->scheduler_cond);
-        pthread_mutex_unlock(&coder->data->scheduler_mutex);
+        release_dongle(coder);
         if (is_simulation_over(coder->data))
             break;
         debug(coder);

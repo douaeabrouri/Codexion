@@ -76,5 +76,16 @@ int is_simulation_over(t_data *data);
 void set_simulation_over(t_data *data);
 void log_state(t_data *data, int id, char *state);
 t_coder *scheduler(t_data * data);
-
+void set_simulation_over(t_data *data);
+void log_state(t_data *data, int id, char *state);
+int is_simulation_over(t_data *data);
+void compile(t_coder *coder);
+void debug(t_coder *coder);
+void refactor(t_coder *coder);
+int coders_is_finished(t_coder *coder);
+int	wait_for_scheduler(t_coder *coder);
+int one_coder(t_coder *coder);
+void take_two_dongles(t_coder *coder);
+void	handle_cooldown(t_coder *coder);
+void release_dongle(t_coder *coder);
 #endif
