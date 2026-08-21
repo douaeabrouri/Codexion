@@ -54,12 +54,19 @@ int is_simulation_over(t_data *data){
 void *monitor(void *arg){
     t_data *data;
     int index;
+    int all_finished;
+    long current_time;
 
     data = (t_data *)arg;
     while(!is_simulation_over(data)){
         index = 0;
+        all_finished = 1;
+        current_time = get_time_ms();
         while(index < data->number_of_coders){
             pthread_mutex_lock(&data->coders[index].coder_mutex);
+            if (data->number_of_compiles_required > 0 && 
+                data->coders[index].finish_compile < data->number_of_compiles_required)
+                all_finished = 0;
             if (data->number_of_compiles_required > 0 && 
                 data->coders[index].finish_compile >= data->number_of_compiles_required)
             {
@@ -69,18 +76,18 @@ void *monitor(void *arg){
             }
             long last_compile = data->coders[index].last_compile;
             pthread_mutex_unlock(&data->coders[index].coder_mutex);
-            if(get_time_ms() - last_compile > data->time_to_burnout){
+            if(current_time - last_compile > data->time_to_burnout){
                 log_state(data, data->coders[index].id, "burned out");
                 set_simulation_over(data);
                 return (NULL);
             }
             index++;
         }
-        if(compiles_finish(data)){
+        if(data->number_of_compiles_required > 0 && all_finished){
             set_simulation_over(data);
            return (NULL);
         }
-        usleep(1000);
+        usleep(500);
     }
     return (NULL);
 }

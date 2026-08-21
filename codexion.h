@@ -66,6 +66,7 @@ typedef struct s_heap{
     t_data *data;
 } t_heap;
 
+
 t_data *parsing(char **lst, int n_arg);
 long get_time_ms(void);
 void ft_usleep(long ms);

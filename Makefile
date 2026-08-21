@@ -15,7 +15,7 @@ $(NAME): $(OBJS)
 	@$(CC) $(CFLAGS) -c $< -o $@
 
 clean:
-	@rm -f $(OBJS)
+	@rm -f $(OBJS) codexion
 
 fclean: clean
 	@rm -f $(NAME)
