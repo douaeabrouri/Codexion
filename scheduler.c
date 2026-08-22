@@ -56,8 +56,7 @@ static int higher_priority(t_data *data, t_coder *a, t_coder *b)
     pthread_mutex_unlock(&a->coder_mutex);
     pthread_mutex_lock(&b->coder_mutex);
     b_last = b->last_compile;
-    pthread_mutex_unlock(&b->coder_mutex);
-    
+    pthread_mutex_unlock(&b->coder_mutex);   
     a_deadline = a_last + a->data->time_to_burnout;
     b_deadline = b_last + b->data->time_to_burnout;
     if (a_deadline != b_deadline)

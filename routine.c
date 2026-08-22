@@ -13,8 +13,8 @@
 #include "codexion.h"
 
 
-void compile(t_coder *coder){
-
+void compile(t_coder *coder)
+{
     log_state(coder->data, coder->id, "is compiling");
     pthread_mutex_lock(&coder->coder_mutex);
     coder->last_compile = get_time_ms();
@@ -25,19 +25,18 @@ void compile(t_coder *coder){
     pthread_mutex_unlock(&coder->coder_mutex);
 }
 
-void debug(t_coder *coder){
+void debug(t_coder *coder)
+{
     log_state(coder->data, coder->id, "is debugging");
     ft_usleep(coder->data->time_to_debug);
 }
 
-void refactor(t_coder *coder){
+void refactor(t_coder *coder)
+{
     log_state(coder->data, coder->id, "is refactoring");
     ft_usleep(coder->data->time_to_refactor);
 }
 
-// --------------------------------------------------------------------------------------
-
-// the coder if it finish 
 int coders_is_finished(t_coder *coder)
 {
     int finished;
