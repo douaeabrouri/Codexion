@@ -6,38 +6,13 @@
 /*   By: doabrour <doabrour@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/21 17:02:40 by doabrour          #+#    #+#             */
-/*   Updated: 2026/08/21 17:03:48 by doabrour         ###   ########.fr       */
+/*   Updated: 2026/08/22 19:26:18 by doabrour         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "codexion.h"
 
-static t_heap *heap_create(t_data *data)
-{
-    t_heap *heap;
 
-    heap = malloc(sizeof(t_heap));
-    if (!heap)
-        return (NULL);
-    heap->coders = malloc(sizeof(t_coder *) * data->number_of_coders);
-    if (!heap->coders)
-    {
-        free(heap);
-        return (NULL);
-    }
-    heap->size = 0;
-    heap->capacity = data->number_of_coders;
-    heap->data = data;
-    return (heap);
-}
-
-static void heap_destroy(t_heap *heap)
-{
-    if (!heap)
-        return ;
-    free(heap->coders);
-    free(heap);
-}
 
 static int higher_priority(t_data *data, t_coder *a, t_coder *b)
 {
@@ -67,120 +42,71 @@ static int higher_priority(t_data *data, t_coder *a, t_coder *b)
     return (a->id < b->id);
 }
 
-static void heap_swap(t_coder **a, t_coder **b)
-{
-    t_coder *tmp;
 
-    tmp = *a;
-    *a = *b;
-    *b = tmp;
+static void	heapify_down(t_heap *heap)
+{
+	int	i;
+	int	left;
+	int	right;
+	int	priority;
+
+	i = 0;
+	while (1)
+	{
+		left = 2 * i + 1;
+		right = 2 * i + 2;
+		priority = i;
+		if (left < heap->size
+			&& higher_priority(heap->data, heap->coders[left],
+				heap->coders[priority]))
+			priority = left;
+		if (right < heap->size
+			&& higher_priority(heap->data, heap->coders[right],
+				heap->coders[priority]))
+			priority = right;
+		if (priority == i)
+			break ;
+		heap_swap(&heap->coders[i], &heap->coders[priority]);
+		i = priority;
+	}
 }
 
-static void heap_push(t_heap *heap, t_coder *coder)
-{
-    int i;
-    int parent;
 
-    if (heap->size >= heap->capacity)
-        return ;
-    i = heap->size;
-    heap->coders[i] = coder;
-    heap->size++;
-    while (i > 0)
-    {
-        parent = (i - 1) / 2;
-        if (!higher_priority(heap->data, heap->coders[i],
-                heap->coders[parent]))
-            break ;
-        heap_swap(&heap->coders[i], &heap->coders[parent]);
-        i = parent;
-    }
+static int	is_better_edf(t_data *data, t_coder *coder, t_coder *best)
+{
+	long	current_deadline;
+	long	best_deadline;
+
+	if (!best)
+		return (1);
+	current_deadline = coder->last_compile + data->time_to_burnout;
+	best_deadline = best->last_compile + data->time_to_burnout;
+	if (current_deadline < best_deadline)
+		return (1);
+	if (current_deadline > best_deadline)
+		return (0);
+	if (coder->waiting_since < best->waiting_since)
+		return (1);
+	if (coder->waiting_since > best->waiting_since)
+		return (0);
+	return (coder->id < best->id);
 }
 
-static t_coder *heap_pop(t_heap *heap)
+t_coder	*edf(t_data *data)
 {
-    t_coder *best;
-    int i;
-    int left;
-    int right;
-    int priority;
+	t_coder	*best;
+	int		i;
 
-    if (!heap || heap->size == 0)
-        return (NULL);
-    best = heap->coders[0];
-    heap->size--;
-    if (heap->size == 0)
-        return (best);
-    heap->coders[0] = heap->coders[heap->size];
-    i = 0;
-    while (1)
-    {
-        left = 2 * i + 1;
-        right = 2 * i + 2;
-        priority = i;
-        if (left < heap->size && higher_priority(heap->data,
-                heap->coders[left], heap->coders[priority]))
-            priority = left;
-        if (right < heap->size && higher_priority(heap->data,
-                heap->coders[right], heap->coders[priority]))
-            priority = right;
-        if (priority == i)
-            break ;
-        heap_swap(&heap->coders[i], &heap->coders[priority]);
-        i = priority;
-    }
-    return (best);
-}
-
-t_coder *edf(t_data *data)
-{
-    t_coder *best;
-    long best_deadline;
-    long current_deadline;
-    int i;
-
-    best = NULL;
-    i = 0;
-
-    while (i < data->number_of_coders)
-    {
-        if (data->coders[i].waiting == 0)
-        {
-            i++;
-            continue;
-        }
-        current_deadline = data->coders[i].last_compile
-            + data->time_to_burnout;
-
-        if (best == NULL)
-        {
-            best = &data->coders[i];
-            best_deadline = current_deadline;
-        }
-        else if (current_deadline < best_deadline)
-        {
-            best = &data->coders[i];
-            best_deadline = current_deadline;
-        }
-        else if (current_deadline == best_deadline)
-        {
-            if (data->coders[i].waiting_since < best->waiting_since)
-            {
-                best = &data->coders[i];
-                best_deadline = current_deadline;
-            }
-            else if (data->coders[i].waiting_since == best->waiting_since
-                && data->coders[i].id < best->id)
-            {
-                best = &data->coders[i];
-                best_deadline = current_deadline;
-            }
-        }
-
-        i++;
-    }
-
-    return (best);
+	best = NULL;
+	i = 0;
+	while (i < data->number_of_coders)
+	{
+		if (data->coders[i].waiting
+			&& is_better_edf(data, &data->coders[i], best))
+			best = &data->coders[i];
+		i++;
+	}
+	return (best);
 }
 
 t_coder *scheduler(t_data *data)

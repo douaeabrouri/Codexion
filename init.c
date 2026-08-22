@@ -6,7 +6,7 @@
 /*   By: doabrour <doabrour@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/21 17:04:03 by doabrour          #+#    #+#             */
-/*   Updated: 2026/08/21 19:28:03 by doabrour         ###   ########.fr       */
+/*   Updated: 2026/08/22 19:29:01 by doabrour         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,7 +35,6 @@ void *routine(void *arg)
             break ;
 		if (one_coder(coder))
 			return (NULL);
-        //
         take_two_dongles(coder);
         handle_cooldown(coder);
         if (is_simulation_over(coder->data))
@@ -51,7 +50,6 @@ void *routine(void *arg)
             break;
         debug(coder);
         refactor(coder);
-
     }
     return (NULL);
 }
