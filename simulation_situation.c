@@ -6,7 +6,7 @@
 /*   By: doabrour <doabrour@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/21 16:59:46 by doabrour          #+#    #+#             */
-/*   Updated: 2026/08/21 17:11:33 by doabrour         ###   ########.fr       */
+/*   Updated: 2026/08/22 19:34:45 by doabrour         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,4 +39,19 @@ int is_simulation_over(t_data *data){
     end = data->simulation_end;
     pthread_mutex_unlock(&data->end_mutex);
     return (end);
+}
+
+//  routine helper 
+void release_dongle(t_coder *coder)
+{
+    long now;
+
+    now = get_time_ms();
+    coder->left->last_relase = now;
+    coder->right->last_relase = now;
+    pthread_mutex_unlock(&coder->left->mutex);
+    pthread_mutex_unlock(&coder->right->mutex);
+    pthread_mutex_lock(&coder->data->scheduler_mutex);
+    pthread_cond_broadcast(&coder->data->scheduler_cond);
+    pthread_mutex_unlock(&coder->data->scheduler_mutex);
 }

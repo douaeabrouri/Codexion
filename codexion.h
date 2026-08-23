@@ -79,10 +79,9 @@ t_coder *scheduler(t_data * data);
 void set_simulation_over(t_data *data);
 void log_state(t_data *data, int id, char *state);
 int is_simulation_over(t_data *data);
-void compile(t_coder *coder);
-void debug(t_coder *coder);
-void refactor(t_coder *coder);
 int coders_is_finished(t_coder *coder);
+void release_dongle(t_coder *coder);
+void	init_dongles(t_dongle *dongles, int number_of_dongles);
 int	wait_for_scheduler(t_coder *coder);
 int one_coder(t_coder *coder);
 void take_two_dongles(t_coder *coder);
@@ -95,6 +94,9 @@ static void heap_push(t_heap *heap, t_coder *coder);
 static t_coder	*heap_pop(t_heap **heap);
 static int higher_priority(t_data *data, t_coder *a, t_coder *b);
 static void	heapify_down(t_heap *heap);
+void compile(t_coder *coder);
+void debug(t_coder *coder);
+void refactor(t_coder *coder);
 
 
 #endif
