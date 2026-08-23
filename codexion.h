@@ -87,16 +87,17 @@ int one_coder(t_coder *coder);
 void take_two_dongles(t_coder *coder);
 void	handle_cooldown(t_coder *coder);
 void release_dongle(t_coder *coder);
-static t_heap *heap_create(t_data *data);
-static void heap_destroy(t_heap *heap);
-static void heap_swap(t_coder **a, t_coder **b);
-static void heap_push(t_heap *heap, t_coder *coder);
-static t_coder	*heap_pop(t_heap **heap);
-static int higher_priority(t_data *data, t_coder *a, t_coder *b);
-static void	heapify_down(t_heap *heap);
 void compile(t_coder *coder);
 void debug(t_coder *coder);
 void refactor(t_coder *coder);
-
+int	check_arg_count(int n_arg);
+int	check_scheduler(char *scheduler);
+void	set_data_value(t_data *data, int loop, int value);
+int	parse_values(t_data *data, char **lst, int n_arg);
+void	set_scheduler(t_data *data, char *scheduler);
+static void heap_swap(t_coder **a, t_coder **b);
+static t_heap *heap_create(t_data *data);
+static void heap_push(t_heap *heap, t_coder *coder);
+static t_coder	*heap_pop(t_heap **heap);
 
 #endif

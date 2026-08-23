@@ -13,7 +13,6 @@
 #include "codexion.h"
 
 
-
 static int higher_priority(t_data *data, t_coder *a, t_coder *b)
 {
     long a_deadline;

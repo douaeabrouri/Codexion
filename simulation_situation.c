@@ -41,7 +41,6 @@ int is_simulation_over(t_data *data){
     return (end);
 }
 
-//  routine helper 
 void release_dongle(t_coder *coder)
 {
     long now;
