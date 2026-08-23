@@ -99,12 +99,17 @@ int				check_scheduler(char *scheduler);
 void			set_data_value(t_data *data, int loop, int value);
 int				parse_values(t_data *data, char **lst, int n_arg);
 void			set_scheduler(t_data *data, char *scheduler);
-// static void		heap_swap(t_coder **a, t_coder **b);
-// static t_heap	*heap_create(t_data *data);
-// static void		heap_push(t_heap *heap, t_coder *coder);
-// static t_coder	*heap_pop(t_heap **heap);
+int				higher_priority(t_data *data, t_coder *a, t_coder *b);
+void			heap_swap(t_coder **a, t_coder **b);
+t_heap			*heap_create(t_data *data);
+void			heap_push(t_heap *heap, t_coder *coder);
+t_coder			*heap_pop(t_heap **heap);
+void			heap_destroy(t_heap *heap);
+void			heapify_down(t_heap *heap);
 int				allocate_resources(t_data *data, pthread_t **threads);
 void			init_simulation(t_data *data);
 void			init_coders(t_data *data);
+int				scheduler_stopped(t_coder *coder);
+int				check_the_input(char *str, int loop);
 
 #endif

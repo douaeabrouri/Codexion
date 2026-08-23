@@ -12,7 +12,7 @@
 
 #include "codexion.h"
 
-static	t_heap	*heap_create(t_data *data)
+t_heap	*heap_create(t_data *data)
 {
 	t_heap	*heap;
 
@@ -31,7 +31,7 @@ static	t_heap	*heap_create(t_data *data)
 	return (heap);
 }
 
-static	void	heap_destroy(t_heap *heap)
+void	heap_destroy(t_heap *heap)
 {
 	if (!heap)
 		return ;
@@ -39,7 +39,7 @@ static	void	heap_destroy(t_heap *heap)
 	free(heap);
 }
 
-static	void	heap_swap(t_coder **a, t_coder **b)
+void	heap_swap(t_coder **a, t_coder **b)
 {
 	t_coder	*tmp;
 
@@ -48,7 +48,7 @@ static	void	heap_swap(t_coder **a, t_coder **b)
 	*b = tmp;
 }
 
-static	void	heap_push(t_heap *heap, t_coder *coder)
+void	heap_push(t_heap *heap, t_coder *coder)
 {
 	int	i;
 	int	parent;
@@ -68,7 +68,7 @@ static	void	heap_push(t_heap *heap, t_coder *coder)
 	}
 }
 
-static	t_coder	*heap_pop(t_heap **heap)
+t_coder	*heap_pop(t_heap **heap)
 {
 	t_coder	*best;
 

@@ -12,7 +12,7 @@
 
 #include "codexion.h"
 
-static	int	higher_priority(t_data *data, t_coder *a, t_coder *b)
+int	higher_priority(t_data *data, t_coder *a, t_coder *b)
 {
 	long	a_deadline;
 	long	b_deadline;
@@ -40,7 +40,7 @@ static	int	higher_priority(t_data *data, t_coder *a, t_coder *b)
 	return (a->id < b->id);
 }
 
-static	void	heapify_down(t_heap *heap)
+void	heapify_down(t_heap *heap)
 {
 	int	i;
 	int	left;
@@ -123,7 +123,7 @@ t_coder	*scheduler(t_data *data)
 			heap_push(heap, &data->coders[i]);
 		i++;
 	}
-	best = heap_pop(heap);
+	best = heap_pop(&heap);
 	heap_destroy(heap);
 	return (best);
 }
