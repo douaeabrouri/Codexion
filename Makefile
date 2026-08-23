@@ -6,7 +6,7 @@
 #    By: doabrour <doabrour@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2026/08/23 15:42:38 by doabrour          #+#    #+#              #
-#    Updated: 2026/08/23 15:42:39 by doabrour         ###   ########.fr        #
+#    Updated: 2026/08/23 17:50:35 by doabrour         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -15,7 +15,8 @@ NAME = codexion
 CC = cc
 CFLAGS = -Wall -Wextra -Werror -pthread
 
-SRCS =  main.c init.c parsing.c scheduler.c managing_time.c monitor.c routine.c simulation_situation.c heap.c
+SRCS =  init.c parsing.c scheduler.c managing_time.c  monitor.c routine.c \
+		utils/simulation_situation.c utils/heap.c  main.c
 OBJS = $(SRCS:.c=.o)
 
 all: $(NAME)

@@ -6,7 +6,7 @@
 /*   By: doabrour <doabrour@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/23 15:18:52 by doabrour          #+#    #+#             */
-/*   Updated: 2026/08/23 15:28:24 by doabrour         ###   ########.fr       */
+/*   Updated: 2026/08/23 17:50:58 by doabrour         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -99,9 +99,12 @@ int				check_scheduler(char *scheduler);
 void			set_data_value(t_data *data, int loop, int value);
 int				parse_values(t_data *data, char **lst, int n_arg);
 void			set_scheduler(t_data *data, char *scheduler);
-static void		heap_swap(t_coder **a, t_coder **b);
-static t_heap	*heap_create(t_data *data);
-static void		heap_push(t_heap *heap, t_coder *coder);
-static t_coder	*heap_pop(t_heap **heap);
+// static void		heap_swap(t_coder **a, t_coder **b);
+// static t_heap	*heap_create(t_data *data);
+// static void		heap_push(t_heap *heap, t_coder *coder);
+// static t_coder	*heap_pop(t_heap **heap);
+int				allocate_resources(t_data *data, pthread_t **threads);
+void			init_simulation(t_data *data);
+void			init_coders(t_data *data);
 
 #endif
