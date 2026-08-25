@@ -51,13 +51,13 @@ The goal of the project is to understand how concurrent systems behave and how s
 ## Compilation
 
 ```bash
-gcc *.c -lpthread -o codexion
+gcc $(find . -name "*.c") -I. -lpthread -o codexion
 ```
 
 or with warnings enabled:
 
 ```bash
-gcc *.c -Wall -Wextra -Werror -lpthread -o codexion
+gcc $(find . -name "*.c") -I. -Wall -Wextra -Werror -lpthread -o codexion
 ```
 
 ---
@@ -345,23 +345,6 @@ Communication between coders and the monitor occurs through shared synchronized 
 
 All accesses are protected by synchronization primitives to ensure visibility between threads.
 
----
-
-# Project Structure
-
-```text
-.
-├── main.c
-├── parsing.c
-├── scheduler.c
-├── monitor.c
-├── managing_time.c
-├── init.c
-├── codexion.h
-└── README.md
-```
-
----
 
 # Resources
 

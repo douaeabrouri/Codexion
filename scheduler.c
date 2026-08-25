@@ -23,7 +23,7 @@ int	higher_priority(t_data *data, t_coder *a, t_coder *b)
 	{
 		if (a->waiting_since != b->waiting_since)
 			return (a->waiting_since < b->waiting_since);
-		return (a->id < b->id);
+		return (a->id > b->id);
 	}
 	pthread_mutex_lock(&a->coder_mutex);
 	a_last = a->last_compile;
@@ -37,7 +37,7 @@ int	higher_priority(t_data *data, t_coder *a, t_coder *b)
 		return (a_deadline < b_deadline);
 	if (a->waiting_since != b->waiting_since)
 		return (a->waiting_since < b->waiting_since);
-	return (a->id < b->id);
+	return (a->id > b->id);
 }
 
 void	heapify_down(t_heap *heap)
@@ -85,7 +85,7 @@ static int	is_better_edf(t_data *data, t_coder *coder, t_coder *best)
 		return (1);
 	if (coder->waiting_since > best->waiting_since)
 		return (0);
-	return (coder->id < best->id);
+	return (coder->id > best->id);
 }
 
 t_coder	*edf(t_data *data)
