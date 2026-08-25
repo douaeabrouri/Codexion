@@ -49,7 +49,7 @@ void	*routine(void *arg)
 	coder = (t_coder *)arg;
 	while (!is_simulation_over(coder->data))
 	{
-		if (!coders_is_finished(coder))
+		if (coders_is_finished(coder))
 			break ;
 		if (!wait_for_scheduler(coder))
 			break ;
